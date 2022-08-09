@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mwim.mapper.mwimMapper">
+
+
+	<insert id="AddAccount" parameterType="accountVo">
+		insert into account (
+			account_id,
+			uid,
+			email,
+			pwd,
+			name,
+			social,
+			account_date,
+			nickname,
+			comment
+		) values (
+			#{account_id},
+			#{uid},
+			#{email},
+			#{pwd},
+			#{name},
+			#{social},
+			sysdate(),
+			#{nickname},
+			#{comment}
+		)
+	</insert>
+
+	<select id="GetAccount" parameterType="accountVo" resultType="accountVo">
+		select * from account where account_id = #{account_id}
+	</select>
+	
+	<select id="GetNickname" parameterType="accountVo" resultType="accountVo">
+		select * from account where nickname = #{nickname}
+	</select>
+	
+	<select id="GetUid" parameterType="accountVo" resultType="accountVo">
+		select * from account where uid = #{uid}
+	</select>
+	
+	<update id="ChangePwd" parameterType="accountVo">
+		update account set
+		pwd = #{pwd}
+		where account_id = #{account_id}
+	</update>
+	
+	<update id="ChangeNickname" parameterType="accountVo">
+		update account set
+		nickname = #{nickname}
+		where account_id = #{account_id}
+	</update>
+	
+	<insert id="addWorld" parameterType="worldVo">
+		insert into world (
+			world_no,
+			maker,
+			nickname,
+			title,
+			url,
+			comment,
+			pic,
+			write_time
+		) values (
+			null,
+			#{maker},
+			#{nickname},
+			#{title},
+			#{url},
+			#{comment},
+			#{pic},
+			default
+		)
+		
+	</insert>
+	
+	<select id="getWorld" parameterType="worldVo" resultType="worldVo">
+		select 
+			A.world_no,
+			A.maker,
+			A.nickname,
+			A.title,
+			A.url,
+			A.comment,
+			A.pic,
+			A.write_time,
+			(
+				select count(*) from world_reply B 
+				where 
+				B.world_no = A.world_no
+			) as 'replyCnt'
+		from world A
+		where maker = #{account_id}
+		order by A.write_time desc
+	</select>
+	
+	<insert id="addWorldReply" parameterType="world_replyVo">
+		insert into world_reply (
+			reply_no,
+			world_no,
+			uid,
+			nickname,
+			comment,
+			pic,
+			writeTime
+		) values (
+			null,
+			#{world_no},
+			#{uid},
+			#{nickname},
+			#{comment},
+			#{pic},
+			default
+		)
+		
+	</insert>
+	
+	<select id="getWorldReply" parameterType="world_replyVo" resultType="world_replyVo">
+		select * from world_reply
+		where world_no = #{world_no}
+		order by writeTime
+	</select>
+	
+	<select id="GetBalance" resultType="balanceVo">
+		select * from balance_game 
+		order by RAND() 
+		limit 1
+	</select>
+	
+	<select id="GetBalanceByNo" parameterType="balanceVo" resultType="balanceVo">
+		select * from balance_game 
+		where game_no = #{game_no}
+	</select>
+	
+	<insert id="AddBalance" parameterType="balanceVo">
+		insert into balance_game(
+			game_no,
+			maker,
+			title0,
+			title1,
+			title2,
+			pick1,
+			pick2
+		) values (
+			null,
+			#{maker},
+			#{title0},
+			#{title1},
+			#{title2},
+			default,
+			default
+		)
+	</insert>
+	
+	<select id="balanceFirstList" resultType="balanceVo">
+		select * from balance_game
+		order by game_no desc
+		limit 6
+	</select>
+	
+	<select id="balanceList" parameterType="balanceVo" resultType="balanceVo">
+		select * from balance_game
+		where 
+		<![CDATA[
+			game_no < #{game_no}	
+		]]>
+		order by game_no desc
+		limit 20
+	</select>
+	
+	<update id="balanceChoiceL" parameterType="balanceVo">
+		update balance_game set 
+		pick1 = pick1 + 1
+		where game_no = #{game_no}
+	</update>
+	<update id="balanceChoiceR" parameterType="balanceVo">
+		update balance_game set 
+		pick2 = pick2 + 1
+		where game_no = #{game_no}
+	</update>
+	
+	<insert id="addGameReply" parameterType="gameReplyVo">
+		insert into game_reply values(
+			null, #{game_type}, #{game_no}, #{nickname},#{writer}, #{content}, default
+		)
+	</insert>
+	
+	<select id="getGameReply" parameterType="gameReplyVo" resultType="gameReplyVo">
+		select * from game_reply
+		where game_type = #{game_type} and game_no = #{game_no}
+	</select>
+	
+	<insert id="addVote" parameterType="voteVo">
+		insert into vote values(
+			null, #{maker}, #{title}, #{vote}, default
+		)
+	</insert>
+	
+	<select id="getVoteRand" resultType="voteVo">
+		select * from vote
+		order by RAND() 
+		limit 1
+	</select>
+	
+	<select id="getVoteByNo" resultType="voteVo" parameterType="voteVo">
+		select * from vote
+		where vote_no = #{vote_no}
+	</select>
+	
+	<select id="getVote" parameterType="voteVo" resultType="voteVo">
+		select * from vote
+		where vote_no = #{vote_no}
+	</select>
+	
+	<update id="updateVote" parameterType="voteVo">
+		update vote set
+		vote = #{vote}
+		where vote_no = #{vote_no}
+	</update>
+	
+	<select id="getRandJoke" resultType="jokeVo">
+		select * from joke
+		order by RAND()
+		limit 1
+	</select>
+	
+	<select id="getJokeByNum" parameterType="jokeVo" resultType="jokeVo">
+		select * from joke
+		where joke_no = #{joke_no}
+	</select>
+	
+	<insert id="addJoke" parameterType="jokeVo">
+		insert into joke values (
+			null,
+			#{title},
+			#{subject},
+			#{maker},
+			default
+		)
+	</insert>
+	
+	<insert id="addDebate" parameterType="debateVo">
+		insert into debate values(
+			null,
+			#{title},
+			#{description},
+			#{opinion1},
+			#{opinion2},
+			#{maker},
+			default
+		)
+	</insert>
+	
+	<select id="randDebate" resultType="debateVo">
+		select * from debate 
+		order by RAND()
+		limit 1
+	</select>
+	
+	<select id="getDebateByNo" parameterType="debateVo" resultType="debateVo">
+		select * from debate
+		where debate_no = #{debate_no}
+	</select>
+	
+	<insert id="addDebateOpinion" parameterType="debate_opinionVo">
+		insert into debate_opinion values(
+			null,
+			#{debate_no},
+			#{opinion_select},
+			#{opinion_txt},
+			default,
+			#{nickname},
+			#{maker},
+			default
+		)
+	</insert>
+	
+	<select id="getDebateOpinionByNo" parameterType="debate_opinionVo" resultType="debate_opinionVo">
+		select * from debate_opinion
+		where 
+		debate_no = #{debate_no}
+		and
+		<![CDATA[
+			opinion_no < #{opinion_no}
+		]]>
+		order by opinion_no desc
+		<!-- limit 100 -->
+	</select>
+	
+	<select id="getDebateList" parameterType="debateVo" resultType="debateVo">
+		select * from debate
+	</select>
+	
+	<insert id="addAddress" parameterType="addressVo">
+		insert into address values (
+			null,
+			#{ip},
+			#{city},
+			#{country},
+			#{latitude},
+			#{longitude},
+			#{state},
+			#{page},
+			default
+		)
+		
+	</insert>
+
+</mapper>
